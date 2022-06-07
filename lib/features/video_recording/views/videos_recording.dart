@@ -33,7 +33,7 @@ class _VideoRecordingState extends State<VideoRecording> {
 
   Future<void> _getCameras() async {
     _cameras = await availableCameras();
-    controller = CameraController(_cameras[0], ResolutionPreset.medium);
+    controller = CameraController(_cameras[1], ResolutionPreset.medium);
     controller.initialize().then((_) {
       if (!mounted) {
         return;
@@ -126,8 +126,6 @@ class _VideoRecordingState extends State<VideoRecording> {
 
       await file.saveTo(filePath);
       _bloc.add(VideoRecordingEventsAddVideo(filePath));
-      print('_bloc.state');
-      print(_bloc.state);
     } on CameraException catch (e) {
       print(e);
       return null;

@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../video_gallery/views/video_player.dart';
 import '../../video_recording/bloc/video_recording_bloc.dart';
 import '../../video_recording/bloc/video_recording_state.dart';
+import '../bloc/idea_reminder_bloc.dart';
+import '../bloc/idea_reminder_events.dart';
+import '../bloc/idea_reminder_state.dart';
 
 class VideosListing extends StatefulWidget {
   const VideosListing({Key? key}) : super(key: key);
@@ -14,12 +17,20 @@ class VideosListing extends StatefulWidget {
 }
 
 class _VideosListingState extends State<VideosListing> {
+  late IdeaReminderBloc _bloc;
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    _bloc = context.read<IdeaReminderBloc>();
+    _bloc.add(IdeaReminderEventsLoad());
+    super.initState();
   }
 
   @override
@@ -36,9 +47,10 @@ class _VideosListingState extends State<VideosListing> {
             child: Text('Idea reminder'),
           ),
         ),
-        body: BlocBuilder<VideoRecordingBloc, VideoRecordingState>(
+        body: BlocBuilder<IdeaReminderBloc, IdeaReminderState>(
           builder: (context, state) {
-            if (state is VideoRecordingStateLoaded) {
+            if (state is IdeaReminderStateLoaded &&
+                state.videoPathList.isNotEmpty) {
               return ListView.builder(
                 itemCount: state.videoPathList.length,
                 itemBuilder: (context, index) {

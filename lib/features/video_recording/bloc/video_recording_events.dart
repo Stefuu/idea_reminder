@@ -5,5 +5,3 @@ class VideoRecordingEventsAddVideo extends VideoRecordingEvents {
 
   final String videoPath;
 }
-
-class VideoRecordingEventsLoad extends VideoRecordingEvents {}

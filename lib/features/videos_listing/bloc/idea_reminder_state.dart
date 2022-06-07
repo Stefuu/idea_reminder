@@ -5,7 +5,7 @@ class IdeaReminderStateInitial extends IdeaReminderState {}
 class IdeaReminderStateLoading extends IdeaReminderState {}
 
 class IdeaReminderStateLoaded extends IdeaReminderState {
-  IdeaReminderStateLoaded({required this.videos});
+  IdeaReminderStateLoaded({required this.videoPathList});
 
-  List<String> videos;
+  List<String> videoPathList;
 }
