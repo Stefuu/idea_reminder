@@ -8,13 +8,16 @@ import 'video_recording_state.dart';
 class VideoRecordingBloc
     extends Bloc<VideoRecordingEvents, VideoRecordingState> {
   VideoRecordingBloc() : super(VideoRecordingStateInitial()) {
-    on<VideoRecordingEventsLoad>(_loadCamera);
+    on<VideoRecordingEventsAddVideo>(_addVideo);
   }
 
-  FutureOr<void> _loadCamera(
-    VideoRecordingEventsLoad event,
+  final List<String> _videoPathList = [];
+
+  FutureOr<void> _addVideo(
+    VideoRecordingEventsAddVideo event,
     Emitter<VideoRecordingState> emit,
   ) {
-    emit(VideoRecordingStateLoaded());
+    _videoPathList.add(event.videoPath);
+    emit(VideoRecordingStateLoaded(_videoPathList));
   }
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/video_gallery/views/video_player.dart';
 import '../features/video_recording/views/videos_recording.dart';
+import '../features/videos_listing/views/videos_listing.dart';
 
 class Router {
   final GoRouter router = GoRouter(
@@ -10,17 +11,12 @@ class Router {
       GoRoute(
         path: '/',
         builder: (BuildContext context, GoRouterState state) =>
-            const CustomVideoPlayer(),
+            const VideosListing(),
       ),
       GoRoute(
         path: '/record',
         builder: (BuildContext context, GoRouterState state) =>
             const VideoRecording(),
-      ),
-      GoRoute(
-        path: '/play',
-        builder: (BuildContext context, GoRouterState state) =>
-            const CustomVideoPlayer(),
       ),
     ],
   );

@@ -2,7 +2,12 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../bloc/video_recording_bloc.dart';
+import '../bloc/video_recording_events.dart';
 
 late List<CameraDescription> _cameras;
 
@@ -14,10 +19,17 @@ class VideoRecording extends StatefulWidget {
 }
 
 class _VideoRecordingState extends State<VideoRecording> {
+  late VideoRecordingBloc _bloc;
   late CameraController controller;
-
   bool _cameraInitialized = false;
   bool _cameraIsRecording = false;
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   Future<void> _getCameras() async {
     _cameras = await availableCameras();
@@ -27,7 +39,6 @@ class _VideoRecordingState extends State<VideoRecording> {
         return;
       }
       setState(() {
-        //!controller.value.isInitialized
         _cameraInitialized = true;
       });
     }).catchError((Object e) {
@@ -47,6 +58,7 @@ class _VideoRecordingState extends State<VideoRecording> {
   @override
   void initState() {
     super.initState();
+    _bloc = context.read<VideoRecordingBloc>();
     _getCameras();
   }
 
@@ -56,7 +68,6 @@ class _VideoRecordingState extends State<VideoRecording> {
     super.dispose();
   }
 
-  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final CameraController? cameraController = controller;
 
@@ -67,8 +78,6 @@ class _VideoRecordingState extends State<VideoRecording> {
 
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      // onNewCameraSelected(cameraController.description);
     }
   }
 
@@ -115,9 +124,10 @@ class _VideoRecordingState extends State<VideoRecording> {
           DateTime.now().millisecondsSinceEpoch.toString();
       final String filePath = '$videoDirectory/${currentTime}.mp4';
 
-      print('filePath');
-      print(filePath);
-      print(file.saveTo(filePath));
+      await file.saveTo(filePath);
+      _bloc.add(VideoRecordingEventsAddVideo(filePath));
+      print('_bloc.state');
+      print(_bloc.state);
     } on CameraException catch (e) {
       print(e);
       return null;
@@ -192,12 +202,57 @@ class _VideoRecordingState extends State<VideoRecording> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_cameraInitialized) {
-      return Container(
-        child: Text('lol'),
-      );
-    }
-    print('ooi');
-    return _mainWidget();
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Idea reminder',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Center(
+            child: Text('Idea reminder'),
+          ),
+        ),
+        body: Builder(
+          builder: (context) {
+            if (!_cameraInitialized) {
+              return const Text('Loading...');
+            }
+            return _mainWidget();
+          },
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list),
+              label: 'Home',
+              backgroundColor: Colors.blueGrey,
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.camera),
+              label: 'Record',
+              backgroundColor: Colors.blueGrey,
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.blueAccent,
+          onTap: (int index) {
+            switch (index) {
+              case 0:
+                context.go('/');
+                break;
+              case 1:
+                context.go('/record');
+                break;
+              default:
+                context.go('/');
+            }
+
+            _onItemTapped(index);
+          },
+        ),
+      ),
+    );
   }
 }
