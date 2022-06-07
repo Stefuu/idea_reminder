@@ -6,8 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../bloc/video_recording_bloc.dart';
-import '../bloc/video_recording_events.dart';
+import '../../../controllers/application_controller/application_controller_bloc.dart';
+import '../../../controllers/application_controller/application_controller_events.dart';
+import '../../../shared/components/navigation_bar.dart';
 
 late List<CameraDescription> _cameras;
 
@@ -19,17 +20,10 @@ class VideoRecording extends StatefulWidget {
 }
 
 class _VideoRecordingState extends State<VideoRecording> {
-  late VideoRecordingBloc _bloc;
+  late ApplicationControllerBloc _bloc;
   late CameraController controller;
   bool _cameraInitialized = false;
   bool _cameraIsRecording = false;
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   Future<void> _getCameras() async {
     _cameras = await availableCameras();
@@ -58,7 +52,7 @@ class _VideoRecordingState extends State<VideoRecording> {
   @override
   void initState() {
     super.initState();
-    _bloc = context.read<VideoRecordingBloc>();
+    _bloc = context.read<ApplicationControllerBloc>();
     _getCameras();
   }
 
@@ -82,7 +76,6 @@ class _VideoRecordingState extends State<VideoRecording> {
   }
 
   Future<void> _startVideoRecording() async {
-    print('controller.value.isRecordingVideo');
     print(controller.value.isRecordingVideo);
     if (!controller.value.isInitialized) {
       return;
@@ -105,7 +98,6 @@ class _VideoRecordingState extends State<VideoRecording> {
   }
 
   Future<void> _stopVideoRecording() async {
-    print('stop!');
     print(controller.value.isRecordingVideo);
     if (!_cameraIsRecording) {
       return null;
@@ -125,7 +117,7 @@ class _VideoRecordingState extends State<VideoRecording> {
       final String filePath = '$videoDirectory/${currentTime}.mp4';
 
       await file.saveTo(filePath);
-      _bloc.add(VideoRecordingEventsAddVideo(filePath));
+      _bloc.add(ApplicationControllerEventsAddVideo(filePath));
     } on CameraException catch (e) {
       print(e);
       return null;
@@ -207,50 +199,20 @@ class _VideoRecordingState extends State<VideoRecording> {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        appBar: AppBar(
-          title: const Center(
-            child: Text('Idea reminder'),
+          appBar: AppBar(
+            title: const Center(
+              child: Text('Idea reminder'),
+            ),
           ),
-        ),
-        body: Builder(
-          builder: (context) {
-            if (!_cameraInitialized) {
-              return const Text('Loading...');
-            }
-            return _mainWidget();
-          },
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: 'Home',
-              backgroundColor: Colors.blueGrey,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.camera),
-              label: 'Record',
-              backgroundColor: Colors.blueGrey,
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.blueAccent,
-          onTap: (int index) {
-            switch (index) {
-              case 0:
-                context.go('/');
-                break;
-              case 1:
-                context.go('/record');
-                break;
-              default:
-                context.go('/');
-            }
-
-            _onItemTapped(index);
-          },
-        ),
-      ),
+          body: Builder(
+            builder: (context) {
+              if (!_cameraInitialized) {
+                return const Text('Loading...');
+              }
+              return _mainWidget();
+            },
+          ),
+          bottomNavigationBar: const BottomNavBar()),
     );
   }
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:idea_reminder/features/videos_listing/bloc/idea_reminder_bloc.dart';
 import './router/router.dart' as go_router;
-import 'features/video_recording/bloc/video_recording_bloc.dart';
+import 'controllers/application_controller/application_controller_bloc.dart';
 
 void main() {
   runApp(IdeaReminder());
@@ -22,11 +21,8 @@ class _IdeaReminderState extends State<IdeaReminder> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<VideoRecordingBloc>(
-          create: (BuildContext context) => VideoRecordingBloc(),
-        ),
-        BlocProvider<IdeaReminderBloc>(
-          create: (BuildContext context) => IdeaReminderBloc(),
+        BlocProvider<ApplicationControllerBloc>(
+          create: (BuildContext context) => ApplicationControllerBloc(),
         ),
       ],
       child: Builder(

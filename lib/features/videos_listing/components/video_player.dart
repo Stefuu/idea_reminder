@@ -67,7 +67,9 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
                         child: Text(
                           'This idea is here since: ${_getDate(widget.videoPath)}',
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
                         ),
                       ),
                       const SizedBox(

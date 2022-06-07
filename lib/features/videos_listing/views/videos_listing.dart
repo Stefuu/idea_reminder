@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:idea_reminder/controllers/application_controller/application_controller_bloc.dart';
 
-import '../../video_gallery/views/video_player.dart';
-import '../../video_recording/bloc/video_recording_bloc.dart';
-import '../../video_recording/bloc/video_recording_state.dart';
-import '../bloc/idea_reminder_bloc.dart';
-import '../bloc/idea_reminder_events.dart';
-import '../bloc/idea_reminder_state.dart';
+import '../../../controllers/application_controller/application_controller_events.dart';
+import '../../../controllers/application_controller/application_controller_state.dart';
+import '../../../shared/components/navigation_bar.dart';
+import '../components/video_player.dart';
 
 class VideosListing extends StatefulWidget {
   const VideosListing({Key? key}) : super(key: key);
@@ -17,19 +16,12 @@ class VideosListing extends StatefulWidget {
 }
 
 class _VideosListingState extends State<VideosListing> {
-  late IdeaReminderBloc _bloc;
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  late ApplicationControllerBloc _bloc;
 
   @override
   void initState() {
-    _bloc = context.read<IdeaReminderBloc>();
-    _bloc.add(IdeaReminderEventsLoad());
+    _bloc = context.read<ApplicationControllerBloc>();
+    _bloc.add(ApplicationControllerEventsLoad());
     super.initState();
   }
 
@@ -47,15 +39,24 @@ class _VideosListingState extends State<VideosListing> {
             child: Text('Idea reminder'),
           ),
         ),
-        body: BlocBuilder<IdeaReminderBloc, IdeaReminderState>(
+        body:
+            BlocBuilder<ApplicationControllerBloc, ApplicationControllerState>(
           builder: (context, state) {
-            if (state is IdeaReminderStateLoaded &&
+            print('state');
+            print(state);
+            if (state is ApplicationControllerStateLoaded &&
                 state.videoPathList.isNotEmpty) {
               return ListView.builder(
                 itemCount: state.videoPathList.length,
                 itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return Center(
+                  return Dismissible(
+                    key: UniqueKey(),
+                    onDismissed: (direction) {
+                      _bloc.add(
+                        ApplicationControllerEventsRemoveVideo(index),
+                      );
+                    },
+                    child: Center(
                       child: Column(
                         children: [
                           const SizedBox(
@@ -77,22 +78,6 @@ class _VideosListingState extends State<VideosListing> {
                           )
                         ],
                       ),
-                    );
-                  }
-                  return Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'Idea #${index + 1}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        CustomVideoPlayer(
-                          videoPath: state.videoPathList[index],
-                        ),
-                      ],
                     ),
                   );
                 },
@@ -103,36 +88,7 @@ class _VideosListingState extends State<VideosListing> {
             }
           },
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: 'Home',
-              backgroundColor: Colors.blueGrey,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.camera),
-              label: 'Record',
-              backgroundColor: Colors.blueGrey,
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.blueAccent,
-          onTap: (int index) {
-            switch (index) {
-              case 0:
-                context.go('/');
-                break;
-              case 1:
-                context.go('/record');
-                break;
-              default:
-                context.go('/');
-            }
-
-            _onItemTapped(index);
-          },
-        ),
+        bottomNavigationBar: const BottomNavBar(),
       ),
     );
   }
